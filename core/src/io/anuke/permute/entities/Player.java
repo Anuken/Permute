@@ -4,9 +4,12 @@ import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.input.GestureDetector;
 
 import io.anuke.permute.Vars;
+import io.anuke.permute.android.GestureHandler;
 import io.anuke.ucore.core.*;
 import io.anuke.ucore.entities.Entities;
 import io.anuke.ucore.entities.Entity;
@@ -16,57 +19,19 @@ public class Player extends Entity{
 	Shape selected;
 	boolean merging;
 
+	public Player() {
+		if(Gdx.app.getType() == ApplicationType.Android){
+			Inputs.addProcessor(new AndroidInput());
+			Inputs.addProcessor(new GestureDetector(20, 0.5f, 2, 0.15f, new GestureHandler()));
+		}else{
+			Inputs.addProcessor(new DesktopInput());
+		}
+	}
+
 	public void update(){
-
-		Shape hover = hovered();
-
-		if(Inputs.buttonRelease(Buttons.LEFT) && merging && selected != null){
-			if(hover == null || Graphics.mouseWorld().dst(hover.x, hover.y) > hover.size || (hover == selected)){
-				float lx = selected.x;
-				float ly = selected.y;
-
-				selected.set(Graphics.mouseWorld().x, Graphics.mouseWorld().y);
-
-				if(selected.collidesTile()){
-					selected.set(lx, ly);
-				}else{
-					Effects.effect("merge", lx, ly);
-					selected.set(Graphics.mouseWorld().x, Graphics.mouseWorld().y);
-					Effects.effect("split", selected);
-				}
-
-			}else if(hover != null && hover != selected){
-				Shape.merge(selected, hover);
-
-				merging = false;
-				selected = null;
-			}
-		}
-
-		if(!Inputs.buttonDown(Buttons.LEFT)){
-			merging = false;
-		}
-
-		if(hover != null && Inputs.buttonUp(Buttons.LEFT)){
-			selected = hover;
-		}
-
-		if(hover == null && Inputs.buttonUp(Buttons.LEFT) && selected != null){
-			selected = null;
-		}
 
 		if(selected != null && (selected.isDead())){
 			selected = null;
-		}
-
-		if(selected != null && Inputs.buttonUp(Buttons.RIGHT) && selected.canSplit()){
-			selected.split();
-			selected.remove();
-			selected = null;
-		}
-
-		if(Inputs.buttonUp(Buttons.LEFT) && selected != null){
-			merging = true;
 		}
 
 		Vars.ui.updateUnitInfo(selected);
@@ -177,10 +142,92 @@ public class Player extends Entity{
 		if(selected != null){
 			Draw.tscl(1 / 6f);
 			Draw.text("[YELLOW][[" + selected.role + "][RED]\nL" + selected.level, selected.x, selected.y + 10 + selected.size);
-			Draw.tscl(0.5f);
+			Draw.tscl(Vars.fontScale);
 		}
 
 		Draw.color();
+	}
 
+	class DesktopInput extends InputAdapter{
+
+		public boolean touchDown(int screenX, int screenY, int pointer, int button){
+			
+			if(button == Buttons.LEFT){
+				Shape hover = hovered();
+			
+				if(hover != null){
+					selected = hover;
+				}
+				
+				if(selected != null){
+					merging = true;
+				}
+				
+				if(hover == null){
+					selected = null;
+				}
+				
+			}else{
+				if(selected != null && selected.canSplit()){
+					selected.split();
+					selected.remove();
+					selected = null;
+				}
+			}
+
+			return false;
+		}
+
+		public boolean touchUp(int screenX, int screenY, int pointer, int button){
+			
+			if(button != Buttons.LEFT)
+				return false;
+
+			Shape hover = hovered();
+
+			if(merging && selected != null){
+				if(hover == null || Graphics.mouseWorld().dst(hover.x, hover.y) > hover.size || (hover == selected)){
+					float lx = selected.x;
+					float ly = selected.y;
+
+					selected.set(Graphics.mouseWorld().x, Graphics.mouseWorld().y);
+
+					if(selected.collidesTile()){
+						selected.set(lx, ly);
+					}else{
+						Effects.effect("merge", lx, ly);
+						selected.set(Graphics.mouseWorld().x, Graphics.mouseWorld().y);
+						Effects.effect("split", selected);
+					}
+
+				}else if(hover != null && hover != selected){
+					Shape.merge(selected, hover);
+
+					merging = false;
+					selected = null;
+				}
+			}
+			
+			merging = false;
+			return false;
+		}
+
+		public boolean touchDragged(int screenX, int screenY, int pointer){
+			return false;
+		}
+	}
+
+	class AndroidInput extends InputAdapter{
+		DesktopInput desk = new DesktopInput();
+		
+		public boolean touchDown (int screenX, int screenY, int pointer, int button) {
+			desk.touchDown(screenX, screenY, pointer, pointer == 0 ? Buttons.LEFT : Buttons.RIGHT);
+			return false;
+		}
+
+		public boolean touchUp (int screenX, int screenY, int pointer, int button) {
+			desk.touchUp(screenX, screenY, pointer, pointer == 0 ? Buttons.LEFT : Buttons.RIGHT);
+			return false;
+		}
 	}
 }

@@ -10,15 +10,18 @@ import com.badlogic.gdx.math.Interpolation;
 import io.anuke.permute.GameState.State;
 import io.anuke.permute.entities.Mutation;
 import io.anuke.permute.entities.Shape;
+import io.anuke.ucore.core.Draw;
 import io.anuke.ucore.function.VisibilityProvider;
 import io.anuke.ucore.modules.SceneModule;
+import io.anuke.ucore.scene.Element;
 import io.anuke.ucore.scene.actions.Actions;
 import io.anuke.ucore.scene.builders.*;
 import io.anuke.ucore.scene.ui.*;
 import io.anuke.ucore.scene.ui.layout.Table;
 
 public class UI extends SceneModule{
-	Dialog gameover, about, paused, tutorial;
+	Dialog gameover, about, paused;
+	TextDialog tutorial;
 	Table shapeinfo;
 	SettingsDialog settings;
 	KeybindDialog keybinds;
@@ -50,6 +53,8 @@ public class UI extends SceneModule{
 	
 	@Override
 	public void init(){
+		Draw.tscl(Vars.fontScale);
+		
 		settings = new SettingsDialog();
 		settings.screenshakePref();
 		settings.volumePrefs();
@@ -182,6 +187,10 @@ public class UI extends SceneModule{
 		tutorial.show();
 	}
 	
+	public void showGameOver(){
+		gameover.show();
+	}
+	
 	public void updateUnitInfo(Shape shape){
 		if(shape == null){
 			shapeinfo.setVisible(false);
@@ -214,7 +223,16 @@ public class UI extends SceneModule{
 					shapeinfo.add("- [pink]" + mut.name());
 				}
 			}
-			
+		}
+	}
+	
+	public void update(){
+		super.update();
+		
+		for(Element e : tutorial.content().getChildren()){
+			Label label = (Label)e;
+			label.setWrap(true);
+			tutorial.content().getCell(label).width(Gdx.graphics.getWidth()-40);
 		}
 	}
 	
@@ -224,12 +242,6 @@ public class UI extends SceneModule{
 	
 	public void hidePaused(){
 		paused.hide();
-	}
-	
-	public void showGameOver(){
-		gameover.content().pack();
-		gameover.invalidateHierarchy();
-		gameover.show();
 	}
 	
 }

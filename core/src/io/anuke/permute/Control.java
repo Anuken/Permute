@@ -2,6 +2,7 @@ package io.anuke.permute;
 
 import static io.anuke.permute.Vars.*;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.MathUtils;
@@ -28,16 +29,18 @@ public class Control extends RendererModule{
 	public Core core;
 	public Tile[][] tiles;
 	public float playTime;
+	public float targetZoom = 1f;
 	//GifRecorder recorder = new GifRecorder(batch);
 	private boolean dying;
 	private boolean reset = true;
-	float targetZoom = 1f;
+	
 	
 	public Control(){
 		cameraScale = 3;
 		
 		atlas = new Atlas("verro.atlas");
 		
+		Gdx.input.setCatchBackKey(true);
 	
 		KeyBinds.defaults(
 			"up", Keys.W,
@@ -45,7 +48,7 @@ public class Control extends RendererModule{
 			"down", Keys.S,
 			"right", Keys.D,
 			"faster", Keys.SHIFT_LEFT, 
-			"pause", Keys.ESCAPE
+			"pause", Gdx.app.getType() == ApplicationType.Android ? Keys.BACK : Keys.ESCAPE
 		);
 		
 		Entities.initPhysics();
@@ -121,6 +124,11 @@ public class Control extends RendererModule{
 		});
 	}
 	
+	public void clampZoom(){
+		targetZoom = Mathf.clamp(targetZoom, 0.5f, 3f);
+		camera.zoom = Mathf.clamp(camera.zoom, 0.5f, 3f);
+	}
+	
 	@Override
 	public void update(){
 		
@@ -139,7 +147,7 @@ public class Control extends RendererModule{
 			
 			if(Inputs.scrolled()){
 				targetZoom -= Inputs.scroll()/4f;
-				targetZoom = Mathf.clamp(targetZoom, 0.5f, 3f);
+				clampZoom();
 			}
 			
 			camera.zoom = MathUtils.lerp(camera.zoom, targetZoom, 0.5f*delta());
@@ -150,7 +158,12 @@ public class Control extends RendererModule{
 			Entities.update();
 			
 			if(!dying){
-				smoothCamera(player.x, player.y, 0.25f);
+				//if(Gdx.app.getType() == ApplicationType.Android){
+				//	setCamera(player.x, player.y);
+				//	camera.update();
+				//}else{
+					smoothCamera(player.x, player.y, 0.25f);
+				//}
 			}else{
 				smoothCamera(0, 0, 0.25f);
 			}
@@ -236,7 +249,7 @@ public class Control extends RendererModule{
 			shape.add();
 		}
 		
-		if(Mathf.chance(0.0023 * Timers.time()/32000f) || Timers.get("enemyspawn", 5000)){
+		if(Mathf.chance(0.002 * Timers.time()/33000f) || Timers.get("enemyspawn", 5000)){
 			boolean spawn = reset;
 			reset = false;
 			
