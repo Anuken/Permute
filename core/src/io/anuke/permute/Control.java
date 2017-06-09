@@ -125,8 +125,8 @@ public class Control extends RendererModule{
 	}
 	
 	public void clampZoom(){
-		targetZoom = Mathf.clamp(targetZoom, 0.5f, 3f);
-		camera.zoom = Mathf.clamp(camera.zoom, 0.5f, 3f);
+		targetZoom = Mathf.clamp(targetZoom, 0.5f, 2f);
+		camera.zoom = Mathf.clamp(camera.zoom, 0.5f, 2f);
 	}
 	
 	@Override
@@ -249,7 +249,7 @@ public class Control extends RendererModule{
 			shape.add();
 		}
 		
-		if(Mathf.chance(0.002 * Timers.time()/33000f) || Timers.get("enemyspawn", 5000)){
+		if(Mathf.chance(0.0017 * Timers.time()/32000f) || Timers.get("enemyspawn", 6000)){
 			boolean spawn = reset;
 			reset = false;
 			

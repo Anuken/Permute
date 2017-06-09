@@ -123,7 +123,7 @@ public enum Role{
 		}
 		
 		public void update(Shape shape){
-			if(Timers.get(this + "replicate", 1050-shape.level*50)){
+			if(Timers.get(this + "replicate", 900-shape.level*50)){
 				Shape spawned = new Shape(shape.friendly);
 				Effects.sound("spawn", spawned);
 				Module.vector.setToRandomDirection().setLength(shape.size);

@@ -26,6 +26,7 @@ public class UI extends SceneModule{
 	SettingsDialog settings;
 	KeybindDialog keybinds;
 	boolean showedTutorial = false;
+	boolean android = Gdx.app.getType() == ApplicationType.Android;
 	
 	VisibilityProvider inmenu = ()->{
 		return GameState.is(State.menu);
@@ -58,14 +59,17 @@ public class UI extends SceneModule{
 		settings = new SettingsDialog();
 		settings.screenshakePref();
 		settings.volumePrefs();
+		settings.getButtonTable().pad(6);
 		
-		tutorial = new TextDialog("Tutorial", Vars.tutorialText);
+		((Table)settings.getButtonTable().getChildren().first()).pad(10);
+		
+		tutorial = new TextDialog("Tutorial", android ? Vars.mobileTutorialText : Vars.tutorialText);
 		
 		tutorial.getButtonTable().addButton("OK", ()->{
 			GameState.set(State.playing);
 			Vars.control.restart();
 			tutorial.hide();
-		}).padBottom(6).size(60, 40);
+		}).padBottom(6).size(70, 50);
 		
 		keybinds = new KeybindDialog();
 		
@@ -85,6 +89,7 @@ public class UI extends SceneModule{
 		});
 		paused.content().row();
 		
+		if(!android)
 		paused.content().addButton("Controls", ()->{
 			keybinds.show();
 		});
@@ -144,16 +149,18 @@ public class UI extends SceneModule{
 			
 			row();
 			
+			if(!android)
 			new button("Controls", ()->{
 				keybinds.show();
 			});
 			
 			row();
 			
+			/*
 			new button("About", ()->{
 				about.show();
 			});
-			
+			*/
 		}}.end().visible(inmenu);
 		
 		new table(){{

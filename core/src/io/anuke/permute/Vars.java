@@ -32,4 +32,21 @@ public class Vars{
 		"",
 		"[royal]The objective is to defend the base and survive as long as possible."
 	};
+	
+	public static final String[] mobileTutorialText = {
+			"[yellow]How to play:",
+			"",
+			"[orange]- Tap and drag units to move them.",
+			"- Tap units with two fingers to split them.",
+			"- Drag units into others to combine them.",
+			"- Use two fingers to pan the view and zoom.",
+			"- You can duplicate unit types by merging them with a unit of a lower type, then splitting them agian.",
+			"",
+			"[SKY]Shapes get XP when they kill others.",
+			"When a shake gets enough XP, they level up.",
+			"",
+			"[crimson]Units can also acquire random mutations from other shapes when they kill them.",
+			"",
+			"[royal]The objective is to defend the base and survive as long as possible."
+		};
 }
